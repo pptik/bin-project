@@ -87,14 +87,14 @@ namespace BBIN_DataResponder
             DateTime timeStart = results.time_stamp;
             TimeSpan timeProcess = DateTime.Now - timeStart;
 
-            var filter = Builders<CommandStatusTable>.Filter.Eq(s => s.UserId,userID);
+            var filter = Builders<CommandStatusTable>.Filter.Eq(s => s.TaskId, taskID);
             var update = Builders<CommandStatusTable>.Update.Set(u => u.Status, 1)
                                                             .Set(u => u.TimeFinish, DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture))
                                                             .Set(u => u.UnitProcessingId, unitProcID)
                                                             .Set(u => u.TimeProccess, timeProcess.ToString())
                                                             .Set("result", processingResult);
                             
-            collections.cmd.UpdateOneAsync(filter, update);
+            collections.cmd.UpdateOne(filter, update);
             Console.WriteLine("Data_Logger {1} : Write Task ID {0} to Command Status Table", taskID, DateTime.Now);
         }
 
