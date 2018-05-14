@@ -80,6 +80,9 @@ namespace BBIN_DataResponder
             //JObject jObj = JObject.Parse(strMessage);
             //JObject resultObj = JObject.Parse(jObj["results"].ToString());
             BsonDocument processingResult = BsonDocument.Parse(results.results.ToString());
+            JArray summary = JArray.Parse(results.summary.ToString());
+
+            BsonArray deserializedArray = BsonDocument.Parse("{\"sum\":" + summary + "}")["sum"].AsBsonArray;
             //Console.WriteLine("before: " +data);
             //string processingResult = data.ToString(Formatting.None);
             //Console.WriteLine("after: " + processingResult);
@@ -92,7 +95,8 @@ namespace BBIN_DataResponder
                                                             .Set(u => u.TimeFinish, DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture))
                                                             .Set(u => u.UnitProcessingId, unitProcID)
                                                             .Set(u => u.TimeProccess, timeProcess.ToString())
-                                                            .Set("result", processingResult);
+                                                            .Set("result", processingResult)
+                                                            .Set("summary", deserializedArray);
                             
             collections.cmd.UpdateOne(filter, update);
             Console.WriteLine("Data_Logger {1} : Write Task ID {0} to Command Status Table", taskID, DateTime.Now);
