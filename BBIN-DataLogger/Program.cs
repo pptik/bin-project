@@ -57,7 +57,7 @@ namespace BBIN_DataLogger
                 dynamic results = JsonConvert.DeserializeObject<dynamic>(strMessage);
                 Console.WriteLine("Data_Logger {1} : Received Task ID {0}", results.task_id, DateTime.Now);
                 InsertLog(collections, strMessage);
-                PublishTask((long) results.task_id, strMessage, ConnectionConstants.QueueUnitProcessing);
+                PublishTask((long) results.task_id, strMessage);
                 // Acknowledge
                 publicChannel.BasicAck(ea.DeliveryTag, false);
 
@@ -85,6 +85,7 @@ namespace BBIN_DataLogger
                 TimeProccess = String.Empty,
                 TimeFinish = String.Empty,
                 UnitProcessingId = String.Empty,
+                TypeDetection = results.type,
                 Status = 0,
                 TaskId = (long)results.task_id,
                 UserId = results.user_id,
@@ -95,11 +96,43 @@ namespace BBIN_DataLogger
             Console.WriteLine("Data_Logger {1} : Write Task ID {0} to Command Status Table", doc.TaskId, DateTime.Now);
         }
 
-        private static void PublishTask(double taskID, string message, string queueName)
+        private static void PublishTask(double taskID, string message)
         {
+            dynamic results = JsonConvert.DeserializeObject<dynamic>(message);
+            string type = results.type;
             byte[] messageBody = Encoding.UTF8.GetBytes(message);
-            Console.WriteLine("Data_Logger {1} : Task ID {0} publish to units processing", taskID, DateTime.Now);
-            channel.BasicPublish("amq.topic", queueName, null, messageBody);
+            string routingKey = ConnectionConstants.QueueUnitProcessing;
+            string filepath = results.path;
+            string ext = System.IO.Path.GetExtension(filepath);
+            switch (type) {
+                case "object":
+                    if (hasImageExt(ext))
+                    {
+                        routingKey = routingKey + ".image"; //to topic request.image
+                    }
+                    else {
+                        routingKey = routingKey + ".video"; //to topic request.video
+                    }
+                    break;
+                case "face":
+                    routingKey = routingKey + ".face"; //to topic request.face
+                    break;
+            }
+
+            Console.WriteLine("Data_Logger {1} : Task ID {0} publish to units processing {2}", taskID, DateTime.Now, routingKey);
+            channel.BasicPublish("amq.topic", routingKey, null, messageBody);
+        }
+
+        private static bool hasImageExt(string ext)
+        {
+            if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private static bool WasQuitKeyPressed()

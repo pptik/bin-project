@@ -8,7 +8,12 @@ namespace BBIN_DataLogger
         //taskid
         [BsonElement("task_id")]
         public long TaskId { get; set; }
-        
+
+
+        //type detection
+        [BsonElement("type")]
+        public string TypeDetection { get; set; }
+
         //pathsource
         [BsonElement("source_path")]
         public string SourcePath { get; set; }
