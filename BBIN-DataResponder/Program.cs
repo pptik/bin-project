@@ -77,11 +77,16 @@ namespace BBIN_DataResponder
 
             long taskID = (long)results.task_id;
             string userID = results.user_id;
+            string typeDetection = results.type;
+            string typeProcc = results.results.type;
+            string resultPath = results.results.resultpath;
             //JObject jObj = JObject.Parse(strMessage);
             //JObject resultObj = JObject.Parse(jObj["results"].ToString());
             BsonDocument processingResult = BsonDocument.Parse(results.results.ToString());
+            JArray procRes = JArray.Parse(results.results.result.ToString());
             JArray summary = JArray.Parse(results.summary.ToString());
 
+            BsonArray bProcRes = BsonDocument.Parse("{\"res\":" + procRes + "}")["res"].AsBsonArray;
             BsonArray deserializedArray = BsonDocument.Parse("{\"sum\":" + summary + "}")["sum"].AsBsonArray;
             //Console.WriteLine("before: " +data);
             //string processingResult = data.ToString(Formatting.None);
@@ -92,10 +97,11 @@ namespace BBIN_DataResponder
 
             var filter = Builders<CommandStatusTable>.Filter.Eq(s => s.TaskId, taskID);
             var update = Builders<CommandStatusTable>.Update.Set(u => u.Status, 1)
-                                                            .Set(u => u.TimeFinish, DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture))
+                                                            .Set(u => u.TimeFinish, DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK"))
                                                             .Set(u => u.UnitProcessingId, unitProcID)
                                                             .Set(u => u.TimeProccess, timeProcess.ToString())
-                                                            .Set("result", processingResult)
+                                                            .Set("result", bProcRes)
+                                                            .Set("result_path", resultPath)
                                                             .Set("summary", deserializedArray);
                             
             collections.cmd.UpdateOne(filter, update);
