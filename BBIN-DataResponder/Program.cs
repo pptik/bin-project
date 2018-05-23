@@ -58,10 +58,21 @@ namespace BBIN_DataResponder
             {
                 counter++;
                 String strMessage = System.Text.Encoding.UTF8.GetString(ea.Body);
+                
                 dynamic results = JsonConvert.DeserializeObject<dynamic>(strMessage);
-                Console.WriteLine("Data_Responder {1} : Received result for Task ID {0}", results.task_id, DateTime.Now);
+                string type = results.type;
+                Console.WriteLine("Data_Responder {1} : Received result for Task ID {0} from routing key {2}", results.task_id, DateTime.Now, ea.RoutingKey);
                 UpdateLog(collections, strMessage);
-                PublishTask((long)results.task_id, strMessage, ConnectionConstants.QueueListener);
+                PublishTaskRestAPI((long)results.task_id, strMessage, ConnectionConstants.QueueListener);
+                
+                //if (!(type.Equals("face")))//kecuali pengenalan wajah, lakukan abandoned object detection
+                //{
+                //    if (ea.RoutingKey.Equals(ConnectionConstants.QueueAbandonedObjectDetection))
+                //    {
+                //        PublishAODQueue((long)results.task_id, strMessage, ConnectionConstants.QueueAbandonedObjectDetection);
+                //    }
+                //}
+                
                 // Acknowledge
                 channel.BasicAck(ea.DeliveryTag, false);
 
@@ -80,11 +91,14 @@ namespace BBIN_DataResponder
             string typeDetection = results.type;
             string typeProcc = results.results.type;
             string resultPath = results.results.resultpath;
+            string typeResult = results.file_type;
             //JObject jObj = JObject.Parse(strMessage);
             //JObject resultObj = JObject.Parse(jObj["results"].ToString());
             BsonDocument processingResult = BsonDocument.Parse(results.results.ToString());
             JArray procRes = JArray.Parse(results.results.result.ToString());
             JArray summary = JArray.Parse(results.summary.ToString());
+            double fps = (double)results.fps;
+            bool aod = (bool)results.aod_enable;
 
             BsonArray bProcRes = BsonDocument.Parse("{\"res\":" + procRes + "}")["res"].AsBsonArray;
             BsonArray deserializedArray = BsonDocument.Parse("{\"sum\":" + summary + "}")["sum"].AsBsonArray;
@@ -93,22 +107,32 @@ namespace BBIN_DataResponder
             //Console.WriteLine("after: " + processingResult);
             string unitProcID = results.unit_id;
             DateTime timeStart = results.time_stamp;
-            TimeSpan timeProcess = DateTime.Now - timeStart;
+            TimeSpan timeProcess = DateTime.UtcNow - timeStart;
 
             var filter = Builders<CommandStatusTable>.Filter.Eq(s => s.TaskId, taskID);
             var update = Builders<CommandStatusTable>.Update.Set(u => u.Status, 1)
-                                                            .Set(u => u.TimeFinish, DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK"))
+                                                            .Set(u => u.TimeFinish, DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK"))
                                                             .Set(u => u.UnitProcessingId, unitProcID)
                                                             .Set(u => u.TimeProccess, timeProcess.ToString())
+                                                            .Set("aod_enable", aod)
                                                             .Set("result", bProcRes)
                                                             .Set("result_path", resultPath)
-                                                            .Set("summary", deserializedArray);
+                                                            .Set("summary", deserializedArray)
+                                                            .Set("fps", fps);
+                                                            
                             
             collections.cmd.UpdateOne(filter, update);
-            Console.WriteLine("Data_Logger {1} : Write Task ID {0} to Command Status Table", taskID, DateTime.Now);
+            Console.WriteLine("Data_Logger {1} : Update result Task ID {0} in Command Status Table", taskID, DateTime.Now);
         }
 
-        private static void PublishTask(long taskID, string message, string queueName)
+        private static void PublishTaskRestAPI(long taskID, string message, string queueName)
+        {
+            byte[] messageBody = Encoding.UTF8.GetBytes(message);
+            Console.WriteLine("Data_Responder {1} : Task ID {0} publish to {2}", taskID, DateTime.Now, queueName);
+            publicChannel.BasicPublish("amq.topic", queueName, null, messageBody);
+        }
+
+        private static void PublishAODQueue(long taskID, string message, string queueName)
         {
             byte[] messageBody = Encoding.UTF8.GetBytes(message);
             Console.WriteLine("Data_Responder {1} : Task ID {0} publish to {2}", taskID, DateTime.Now, queueName);
