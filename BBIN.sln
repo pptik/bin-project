@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBIN-DataLogger", "BBIN-Dat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBIN-DataResponder", "BBIN-DataResponder\BBIN-DataResponder.csproj", "{16F40948-6733-4409-96FA-2CB46599C32B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBIN-FaceMatchingService", "BBIN-FaceMatchingService\BBIN-FaceMatchingService.csproj", "{35A8CC38-AE2F-43D8-A3BB-1B8394045C2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{16F40948-6733-4409-96FA-2CB46599C32B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{16F40948-6733-4409-96FA-2CB46599C32B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16F40948-6733-4409-96FA-2CB46599C32B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35A8CC38-AE2F-43D8-A3BB-1B8394045C2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35A8CC38-AE2F-43D8-A3BB-1B8394045C2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35A8CC38-AE2F-43D8-A3BB-1B8394045C2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35A8CC38-AE2F-43D8-A3BB-1B8394045C2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
