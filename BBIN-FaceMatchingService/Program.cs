@@ -121,7 +121,7 @@ namespace BBIN_FaceMatchingService
 
             //Console.WriteLine(jobj.ToString());
             byte[] messageBody = Encoding.UTF8.GetBytes(jobj.ToString());
-            Console.WriteLine("Service {1} : FB ID {0} publish to units processing {2}", facebookID, DateTime.Now, routingKey);
+            Console.WriteLine("Service {1} : FB ID {0} publish to units processing {2}, {3} face photos", facebookID, DateTime.Now, routingKey, listPhotosFace.Count);
             channel.BasicPublish("amq.topic", routingKey, null, messageBody);
         }
     }

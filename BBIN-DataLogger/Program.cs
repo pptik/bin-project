@@ -115,7 +115,15 @@ namespace BBIN_DataLogger
                     }
                     break;
                 case "face":
-                    routingKey = routingKey + ".face"; //to topic request.face
+                    //routingKey = routingKey + ".face"; //to topic request.face
+                    if (hasImageExt(ext))
+                    {
+                        routingKey = routingKey + ".face.image"; //to topic request.face.image
+                    }
+                    else
+                    {
+                        routingKey = routingKey + ".face.video"; //to topic request.face.video
+                    }
                     break;
             }
 
