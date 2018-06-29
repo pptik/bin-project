@@ -103,7 +103,7 @@ namespace BBIN_DataLogger
             byte[] messageBody = Encoding.UTF8.GetBytes(message);
             string routingKey = ConnectionConstants.QueueUnitProcessing;
             string filepath = results.path;
-            string ext = System.IO.Path.GetExtension(filepath);
+            string ext = System.IO.Path.GetExtension(filepath).ToLower();
             switch (type) {
                 case "object":
                     if (hasImageExt(ext))
@@ -118,11 +118,11 @@ namespace BBIN_DataLogger
                     //routingKey = routingKey + ".face"; //to topic request.face
                     if (hasImageExt(ext))
                     {
-                        routingKey = routingKey + ".face.image"; //to topic request.face.image
+                        routingKey = routingKey + ".faceimage"; //to topic request.face.image
                     }
                     else
                     {
-                        routingKey = routingKey + ".face.video"; //to topic request.face.video
+                        routingKey = routingKey + ".facevideo"; //to topic request.face.video
                     }
                     break;
             }
